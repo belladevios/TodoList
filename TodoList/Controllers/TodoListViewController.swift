@@ -11,20 +11,12 @@ import UIKit
 class TodoListViewController: UITableViewController {
 
     var itemsArray = [Item]()
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        let item1 = Item()
-        item1.title = "Cleaining"
-        self.itemsArray.append(item1)
         
-        let item2 = Item()
-        item2.title = "Shoping"
-        self.itemsArray.append(item2)
-        
-        let item3 = Item()
-        item3.title = "Travelling"
-        self.itemsArray.append(item3)
+        self.loadItems()
     }
 
     //MARK: Table view Datasource methods
@@ -47,9 +39,33 @@ class TodoListViewController: UITableViewController {
         self.itemsArray[indexPath.row].done = !self.itemsArray[indexPath.row].done
         tableView.deselectRow(at: indexPath, animated: true)
         
+        self.saveItems()
+    }
+    
+    //MARK:-
+    func saveItems() -> Void {
+        //encode data to Items.plist
+        let encoder = PropertyListEncoder()
+        do{
+            let data = try encoder.encode(self.itemsArray)
+            try data.write(to: self.dataFilePath!)
+        }catch{
+            print("Error to ecode data !!!!")
+        }
         self.tableView.reloadData()
     }
     
+    func loadItems() -> Void {
+        if let data = try? Data(contentsOf: dataFilePath!) {
+            let  decoder = PropertyListDecoder()
+            do
+            {
+                self.itemsArray = try decoder.decode([Item].self, from: data)
+            } catch{
+                print(print("Error to decode data !!!!"))
+            }
+        }
+    }
     
     @IBAction func addButtonAction(_ sender: UIBarButtonItem) {
         var textField = UITextField()
@@ -66,11 +82,10 @@ class TodoListViewController: UITableViewController {
                 
                 item.title = title
                 self.itemsArray.append(item)
-                self.tableView.reloadData()
+                
+                self.saveItems()
             }
-           
         }))
-        
         present(alert, animated: true, completion: nil)
     }
 }
