@@ -114,11 +114,8 @@ class TodoListViewController: UITableViewController {
         }catch {
             print("Error fetching data fron context \(error)")
         }
-        
         self.tableView.reloadData()
     }
-    
-    
 }
 
 //MARK: - Search bar methods
